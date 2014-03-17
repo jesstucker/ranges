@@ -1,33 +1,6 @@
 import re
 
-
-range_list = []
-rangey = range(1,10000)
-for each in rangey:
-	if each > 0 and each < 1000:
-		range_list.append({each: '100s'})
-	elif each >= 1000 and each < 2000:
-		range_list.append({each: '1000s'})
-	elif each >= 2000 and each < 3000:
-		range_list.append({each: '2000s'})
-	elif each >= 3000 and each < 4000:
-		range_list.append({each: '3000s'})
-	elif each >= 4000 and each < 5000:
-		range_list.append({each: '4000s'})
-	elif each >= 5000 and each < 6000:
-		range_list.append({each: '5000s'})
-	elif each >= 6000 and each < 7000:
-		range_list.append({each: '6000s'})
-	elif each >= 7000 and each < 8000:
-		range_list.append({each: '7000s'})
-	elif each >= 8000 and each < 9000:
-		range_list.append({each: '8000s'})
-	elif each >= 9000 and each < 10000:
-		range_list.append({each: '9000s'})
-
-merged_dictionary = {k: v for d in range_list for k, v in d.items() }
-
-
+# A very simple regex finder for alpha and numeric call number parts:
 class FindElement:
 	def alpha(self, callnumber_string):
 		p = r'^[A-Z]{1,3}'
@@ -47,13 +20,16 @@ class FindElement:
 
 find = FindElement()
 
+# Some simple lists for checking call number letters against:
 A_M = ['A','B','C','D','E','F','G','H','I','J','K','L','M']
-main_N = ['N','NA','NB','NC','ND','NE',]
-NK_S = ['NK','NX',
-		'P','PA','PB','PC','PD','PE','PF','PG','PH','PJ','PK','PL','PM','PN','PQ','PR','PS','PT','PZ',
-		'Q','QA','QB','QC','QD','QE','QH','QK','QL','QM','QP','QR',
-		'R','RA','RB','RC','RD','RE','RF','RG','RJ','RK','RL','RM','RS','RT','RV','RX','RZ',
-		'S','SB','SD','SF','SH','SK',]
+main_N = ['N','NA','NB','NC','ND',]
+# This list is replaced by simpler code in the categorize function:
+# NX_S = ['NX',
+# 		'P','PA','PB','PC','PD','PE','PF','PG','PH','PJ','PK','PL','PM','PN','PQ','PR','PS','PT','PZ',
+# 		'Q','QA','QB','QC','QD','QE','QH','QK','QL','QM','QP','QR',
+# 		'R','RA','RB','RC','RD','RE','RF','RG','RJ','RK','RL','RM','RS','RT','RV','RX','RZ',
+# 		'S','SB','SD','SF','SH','SK',]
+Q_S = ['Q', 'R', 'S']
 T_TP = ['T','TA','TC','TD','TE','TF','TG','TH','TJ','TK','TL','TN','TP',]
 TR = ['TR',]
 TS_Z = ['TS','TT','TX',
@@ -61,70 +37,22 @@ TS_Z = ['TS','TT','TX',
 		'V','VA','VB','VC','VD','VE','VF','VG','VK','VM',
 		'Z','ZA']
 
-def categorize(empty_list, array):
-	for callnumber in array:
-		letter = find.alpha(callnumber)
-		if letter[0] in A_M:
-			empty_list.append(callnumber + ' |' + letter[0])
-		elif letter in main_N:
-			number = int(find.num(callnumber))
-			category = merged_dictionary[number]
-			empty_list.append(callnumber + ' |' + letter + category)
-		elif letter == 'NE':
-			empty_list.append(callnumber + ' |NE')
-		elif letter in NK_S:
-			empty_list.append(callnumber + ' |NK-S')
-		elif letter in T_TP:
-			empty_list.append(callnumber + ' |T-TP')
-		elif letter == 'TR':
-			empty_list.append(callnumber + ' |TR')
-		elif letter in TS_Z:
-			empty_list.append(callnumber + ' |TS-Z')
 
-
-def categorize2(empty_list):
-	for callnumber in array:
-		letter = find.alpha(callnumber)
-		number = int(find.num(callnumber))
-		if letter[0] in A_M:
-			empty_list.append(callnumber + ' |' + letter[0])
-		if letter == 'N':
-			# the merged dictionary is going to have to change for more rules
-			category = merged_dictionary[number] 
-
-
-
-N_dict = {"N123": "N100-999"}
-
-N_range = range(1,1000)
-
-for each in N_range:
-	print 'N' + str(each)
-
-
-
-# Yes...
-N100s_range = ['N' + str(each) for each in range(1,1000)]
-empt = []
-for each in N100s_range:
-	empt.append({each: "N1-999"})
-N100s_dict = dict((k,v) for d in empt for (k,v) in d.items())
-# Only works for 2.7 
-# N100s_dict = { k: v for d in empt for k, v in d.items() }
-
-
-
-
-
+# This function makes tranche categories clearer and easier to write.  
+# No doubt, it's a little obfuscated for my liking, but its benefits
+# are palpable; code for writing tranches is made readable. Could even
+# have a non-coder write them out.
 def tranche(letter, min, max, label):
+	# List comprehension for creating an initial list of ranges:
 	the_range = [letter + str(each) for each in range(min, max)]
-	empt_list = []
-	for each in the_range:
-		empt_list.append({each: label})
-	the_dict = dict((k,v) for d in empt_list for (k,v) in d.items())
+	# List comprehension converts to individual dictionaries with label values:
+	with_labels = [{each: label} for each in the_range]
+	# Merge the individual dictionaries into one:
+	the_dict = dict((k,v) for d in with_labels for (k,v) in d.items())
 	return the_dict
 
-
+# Individual variables return dictionaries containing core call number
+# ranges.
 N0100 = tranche('N', 1, 1000, 'N1-999')
 N1000 = tranche('N', 1000, 6000, 'N1000-5999')
 N6000 = tranche('N', 6000, 7000, 'N6000-6999')
@@ -162,7 +90,8 @@ ND1000 = tranche('ND', 1000, 10000, 'ND1000-9999')
 TR1_500 = tranche('TR', 1, 600, 'TR1-599')
 TR600_900 = tranche('TR', 600, 1000, 'TR600-999')
 
-
+# List of dictionaries collected for the purpose of merging
+# into a master dictionary:
 tranches = [
 	N0100, N1000, N6000, N7000, N8000_9000,
 	NA0100, NA1000, NA2000, NA3000, NA4000,
@@ -174,8 +103,58 @@ tranches = [
 	TR1_500, TR600_900,
 ]
 
+# Merging all dictionaries into a master dictionary for reference:
 master_dictionary = dict((k,v) for d in tranches for (k,v) in d.items())
 
+# Takes incoming call number list and appends the proper category. Checks
+# against the master_dictionary:
+def categorize(callnumber_list):
+	empty_list = []
+	for callnumber in callnumber_list:
+		callnumber = callnumber.encode("UTF-8")
+		letter = find.alpha(callnumber)
+		if letter[0] in A_M:
+			empty_list.append(callnumber + ' |' + letter[0])
+		elif letter in main_N:
+			number = find.num(callnumber)
+			key = letter + number
+			category = master_dictionary[key]
+			empty_list.append(callnumber + ' |' + category)
+		elif letter == 'NE':
+			empty_list.append(callnumber + ' |NE')
+		elif letter == 'NK':
+			empty_list.append(callnumber + ' |NK')
+		elif letter == 'NX':
+			empty_list.append(callnumber + ' |NX')
+		elif letter[0] == 'P':
+			empty_list.append(callnumber + ' |P')
+		elif letter[0] in Q_S: 
+			empty_list.append(callnumber + ' |Q-S')
+		elif letter in T_TP:
+			empty_list.append(callnumber + ' |T-TP')
+		elif letter == 'TR':
+			number = find.num(callnumber)
+			key = letter + number
+			category = master_dictionary[key]
+			empty_list.append(callnumber + ' |' + category)
+		elif letter in TS_Z:
+			empty_list.append(callnumber + ' |TS-Z')
+		else:
+			empty_list.append(callnumber + ' |mybugs')
+	return empty_list
+
+# At this point, what you do is simply set a new variable to the categorize
+# function, which will return a list of callnumbers appended with the appropriate
+# category.  Here is an example:
+
+# if in repl:
+
+# >> category_result = categorize(callnumber_list)
+# >> category_result
+# >> ['NA4972 .A4 2010 |NA4000-4999'],
+# >> 'N6537 .A4 A8 2010 |N6000-6999',
+# >> ...
+# >> ]
 
 
 
