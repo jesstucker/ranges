@@ -1,0 +1,8 @@
+Sup–
+
+So you work in library circulation.  Your library acquires more books than there's space to put them.  You try your best to shift to anticipate future growth, but you're just guessing really.
+
+Enter my dumb project.  This tool will let you define a category of books and apply whatever label you'd like. We call them "tranches."  Since this project is dumb and
+immature, it's never going to make sense to anyone. It's useful for us though.
+
+Bye!!!!
